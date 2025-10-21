@@ -16,11 +16,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
-        
+
         // Désactiver CSRF pour les routes API
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
+
+        // Pour les requêtes API, retourner 401 au lieu de rediriger vers login
+        $middleware->redirectGuestsTo(function ($request) {
+            // Pour une API pure, on retourne toujours null pour déclencher une erreur 401
+            // au lieu de rediriger vers une page de login
+            return null;
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
