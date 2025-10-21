@@ -67,134 +67,29 @@ Après le seeding, vous aurez :
 - **Writer 2** : writer2@blog.com / password
 - **User** : user@blog.com / password
 
-## 📚 Endpoints API
+## 📚 Endpoints principaux
+
+### Public
+- `GET /api/posts` - Liste des articles
+- `GET /api/posts/{slug}` - Détail d'un article
+- `GET /api/categories` - Liste des catégories
+- `GET /api/tags` - Liste des tags
+- `POST /api/posts/{post}/comments` - Ajouter un commentaire
 
 ### Authentification
+- `POST /api/register` - Inscription
+- `POST /api/login` - Connexion
+- `POST /api/logout` - Déconnexion (authentifié)
+- `GET /api/user` - Profil utilisateur (authentifié)
 
-#### Inscription
-```bash
-POST /api/auth/register
-Content-Type: application/json
-
-{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
-    "password_confirmation": "password123"
-}
-```
-
-**Réponse :**
-```json
-{
-    "message": "Utilisateur créé avec succès",
-    "user": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "created_at": "2025-10-21T12:00:00.000000Z",
-        "updated_at": "2025-10-21T12:00:00.000000Z"
-    },
-    "access_token": "1|xxxxxxxxxxxxxxxxxxxx",
-    "token_type": "Bearer"
-}
-```
-
-#### Connexion
-```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-    "email": "john@example.com",
-    "password": "password123"
-}
-```
-
-**Réponse :**
-```json
-{
-    "message": "Connexion réussie",
-    "user": {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com"
-    },
-    "access_token": "2|xxxxxxxxxxxxxxxxxxxx",
-    "token_type": "Bearer"
-}
-```
-
-#### Récupérer l'utilisateur authentifié
-```bash
-GET /api/user
-Authorization: Bearer {token}
-```
-
-**Réponse :**
-```json
-{
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "email_verified_at": null,
-    "created_at": "2025-10-21T12:00:00.000000Z",
-    "updated_at": "2025-10-21T12:00:00.000000Z"
-}
-```
-
-#### Déconnexion
-```bash
-POST /api/auth/logout
-Authorization: Bearer {token}
-```
-
-**Réponse :**
-```json
-{
-    "message": "Déconnexion réussie"
-}
-```
-
-### Exemples cURL
-
-**Inscription :**
-```bash
-curl -X POST http://localhost:8000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
-    "password_confirmation": "password123"
-  }'
-```
-
-**Connexion :**
-```bash
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{
-    "email": "john@example.com",
-    "password": "password123"
-  }'
-```
-
-**Récupérer l'utilisateur authentifié :**
-```bash
-curl -X GET http://localhost:8000/api/user \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Accept: application/json"
-```
-
-**Déconnexion :**
-```bash
-curl -X POST http://localhost:8000/api/auth/logout \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Accept: application/json"
-```
+### Admin (authentifié + rôles)
+- `GET /api/admin/posts` - Gérer les articles
+- `POST /api/admin/posts` - Créer un article
+- `PUT /api/admin/posts/{id}` - Modifier un article
+- `DELETE /api/admin/posts/{id}` - Supprimer un article
+- `GET /api/admin/comments` - Modérer les commentaires
+- `PUT /api/admin/comments/{id}/approve` - Approuver un commentaire
+- `DELETE /api/admin/comments/{id}` - Supprimer un commentaire
 
 ## 🧪 Tests
 
