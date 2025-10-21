@@ -30,5 +30,19 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Gérer les erreurs d'authentification pour retourner JSON au lieu de rediriger
+        $exceptions->respond(function ($response, $exception, $request) {
+            // Pour les requêtes API, retourner une réponse JSON appropriée
+            if ($request->is('api/*') || $request->expectsJson()) {
+                if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthenticated. Please login to access this resource.',
+                        'error' => 'Unauthorized'
+                    ], 401);
+                }
+            }
+
+            return $response;
+        });
     })->create();
