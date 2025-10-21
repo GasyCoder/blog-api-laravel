@@ -12,7 +12,34 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Register a new user
+     * Show register endpoint information (GET)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showRegisterForm()
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Register endpoint information',
+            'endpoint' => '/api/register',
+            'method' => 'POST',
+            'required_fields' => [
+                'name' => 'string|max:255',
+                'email' => 'string|email|max:255|unique',
+                'password' => 'string|min:8',
+                'password_confirmation' => 'string|min:8|same as password',
+            ],
+            'example' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ]
+        ], 200);
+    }
+
+    /**
+     * Register a new user (POST)
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -45,7 +72,30 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user
+     * Show login endpoint information (GET)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showLoginForm()
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Login endpoint information',
+            'endpoint' => '/api/login',
+            'method' => 'POST',
+            'required_fields' => [
+                'email' => 'string|email',
+                'password' => 'string',
+            ],
+            'example' => [
+                'email' => 'john@example.com',
+                'password' => 'password123',
+            ]
+        ], 200);
+    }
+
+    /**
+     * Login user (POST)
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
