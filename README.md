@@ -1,11 +1,11 @@
-# Blog Headless API - Laravel 12
+# Blog API - Laravel 12
 
-API REST complète pour un système de blog headless avec authentification, gestion des rôles et modération.
+API REST pour un système de blog avec authentification complète via Laravel Sanctum.
 
 ## 🚀 Technologies
 
 - Laravel 12
-- MySQL 8+
+- MySQL 8+ / SQLite
 - Laravel Sanctum (authentification API)
 - PHP 8.2+
 
@@ -13,44 +13,25 @@ API REST complète pour un système de blog headless avec authentification, gest
 
 - PHP >= 8.2
 - Composer
-- MySQL >= 8.0
-- Extension PHP : mbstring, xml, bcmath, pdo_mysql
+- MySQL >= 8.0 ou SQLite
+- Extensions PHP : mbstring, xml, bcmath, pdo_mysql (ou pdo_sqlite)
 
-## ⚙️ Installation
+## ⚙️ Installation rapide
 
 ```bash
 # Cloner le projet
-git clone <repository-url> blog-api
-cd blog-api
+git clone <repository-url> blog-api-laravel
+cd blog-api-laravel
 
-# Installer les dépendances
+# Option 1: Installation automatique avec SQLite
+chmod +x install.sh
+./install.sh
+
+# Option 2: Installation manuelle
 composer install
-
-# Copier le fichier d'environnement
 cp .env.example .env
-
-# Générer la clé d'application
 php artisan key:generate
-
-# Configurer la base de données dans .env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=blog_headless
-DB_USERNAME=root
-DB_PASSWORD=
-
-# Créer la base de données
-mysql -u root -p -e "CREATE DATABASE blog_headless CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# Exécuter les migrations
 php artisan migrate
-
-# Générer des données de test
-php artisan db:seed
-
-# Créer le lien symbolique pour le stockage
-php artisan storage:link
 
 # Lancer le serveur de développement
 php artisan serve
@@ -58,92 +39,137 @@ php artisan serve
 
 L'API sera accessible sur `http://localhost:8000`
 
-## 🔑 Comptes de test
+## 🔧 Configuration MySQL (optionnel)
 
-Après le seeding, vous aurez :
+Si vous préférez utiliser MySQL au lieu de SQLite, modifiez votre fichier `.env` :
 
-- **Superadmin** : superadmin@blog.com / password
-- **Writer 1** : writer1@blog.com / password
-- **Writer 2** : writer2@blog.com / password
-- **User** : user@blog.com / password
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=blog_api_laravel
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
+```
 
-## 📚 Endpoints principaux
-
-### Public
-- `GET /api/posts` - Liste des articles
-- `GET /api/posts/{slug}` - Détail d'un article
-- `GET /api/categories` - Liste des catégories
-- `GET /api/tags` - Liste des tags
-- `POST /api/posts/{post}/comments` - Ajouter un commentaire
-
-### Authentification
-- `POST /api/register` - Inscription
-- `POST /api/login` - Connexion
-- `POST /api/logout` - Déconnexion (authentifié)
-- `GET /api/user` - Profil utilisateur (authentifié)
-
-### Admin (authentifié + rôles)
-- `GET /api/admin/posts` - Gérer les articles
-- `POST /api/admin/posts` - Créer un article
-- `PUT /api/admin/posts/{id}` - Modifier un article
-- `DELETE /api/admin/posts/{id}` - Supprimer un article
-- `GET /api/admin/comments` - Modérer les commentaires
-- `PUT /api/admin/comments/{id}/approve` - Approuver un commentaire
-- `DELETE /api/admin/comments/{id}` - Supprimer un commentaire
-
-## 🧪 Tests
+Puis créez la base de données :
 
 ```bash
-# Exécuter tous les tests
-php artisan test
+mysql -u root -p -e "CREATE DATABASE blog_api_laravel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+php artisan migrate
+```
 
-# Tests avec couverture
-php artisan test --coverage
+## 📚 Endpoints de l'API
+
+### Health Check
+- `GET /api/health` - Vérifier l'état de l'API
+
+### Authentification (Public)
+- `POST /api/register` - Inscription d'un nouvel utilisateur
+- `POST /api/login` - Connexion
+
+### Authentification (Protégé - nécessite un token)
+- `GET /api/user` - Obtenir le profil de l'utilisateur connecté
+- `POST /api/logout` - Déconnexion (révoque le token actuel)
+- `POST /api/logout-all` - Déconnexion de tous les appareils (révoque tous les tokens)
+
+### Blog Posts (Protégé - nécessite un token)
+- `GET /api/posts` - Liste des articles
+- `POST /api/posts` - Créer un article
+- `GET /api/posts/{id}` - Détails d'un article
+- `PUT /api/posts/{id}` - Modifier un article
+- `DELETE /api/posts/{id}` - Supprimer un article
+
+## 📖 Documentation détaillée
+
+Pour plus de détails sur l'utilisation de l'API, consultez le fichier **[API_SETUP.md](API_SETUP.md)** qui contient :
+- Exemples de requêtes cURL
+- Guide d'utilisation avec Postman
+- Exemples de réponses JSON
+- Gestion des erreurs
+
+## 🧪 Tester l'API
+
+### Exemple : Inscription et connexion
+
+1. **Inscription** :
+```bash
+curl -X POST http://localhost:8000/api/register \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+  }'
+```
+
+2. **Connexion** :
+```bash
+curl -X POST http://localhost:8000/api/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
+3. **Utiliser le token** (remplacez `{token}` par le token reçu) :
+```bash
+curl -X GET http://localhost:8000/api/user \
+  -H "Authorization: Bearer {token}" \
+  -H "Accept: application/json"
 ```
 
 ## 🔒 Sécurité
 
-- Rate limiting sur les endpoints publics (60 requêtes/minute)
-- Rate limiting sur l'authentification (5 tentatives/minute)
-- Validation stricte des entrées
-- Protection CSRF désactivée pour l'API
-- Tokens Sanctum avec expiration
+- ✅ Authentification via Laravel Sanctum
+- ✅ Tokens API sécurisés
+- ✅ Validation stricte des entrées
+- ✅ Hashage des mots de passe avec bcrypt
+- ✅ Protection contre les injections SQL via Eloquent ORM
+- ✅ Révocation de tokens lors de la déconnexion
 
-## 📦 Structure
+## 📦 Structure du projet
 
 ```
 app/
 ├── Http/
-│   ├── Controllers/
-│   │   ├── API/
-│   │   │   ├── AuthController.php
-│   │   │   ├── PostController.php
-│   │   │   ├── CommentController.php
-│   │   │   ├── CategoryController.php
-│   │   │   └── TagController.php
-│   │   └── Admin/
-│   │       ├── PostController.php
-│   │       └── CommentController.php
-│   ├── Middleware/
-│   │   └── CheckRole.php
-│   └── Requests/
-│       ├── StorePostRequest.php
-│       ├── UpdatePostRequest.php
-│       └── StoreCommentRequest.php
+│   └── Controllers/
+│       └── Api/
+│           ├── AuthController.php    # Authentification
+│           └── BlogController.php    # Gestion des posts (template)
 ├── Models/
-│   ├── User.php
-│   ├── Post.php
-│   ├── Category.php
-│   ├── Tag.php
-│   └── Comment.php
-└── Traits/
-    └── ApiResponse.php
+│   └── User.php                      # Modèle utilisateur avec HasApiTokens
+config/
+│   ├── auth.php                      # Configuration de l'authentification
+│   └── sanctum.php                   # Configuration de Sanctum
+database/
+│   └── migrations/
+│       ├── ..._create_users_table.php
+│       └── ..._create_personal_access_tokens_table.php
+routes/
+│   └── api.php                       # Routes de l'API
 ```
 
-## 🌐 Déploiement
+## 🚀 Prochaines étapes
 
-Voir le fichier `DEPLOYMENT.md` pour les instructions de déploiement sur VPS.
+Ce projet est configuré avec l'authentification de base. Vous pouvez l'étendre en ajoutant :
+- ✨ Modèles et contrôleurs pour les articles de blog (Post)
+- ✨ Catégories et tags
+- ✨ Commentaires
+- ✨ Upload d'images
+- ✨ Pagination
+- ✨ Filtres et recherche
+- ✨ Rate limiting
+- ✨ Permissions et rôles utilisateurs
 
 ## 📄 Licence
 
 MIT
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à proposer une pull request.
